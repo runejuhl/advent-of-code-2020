@@ -164,29 +164,88 @@ valid values. Continue to treat cid as optional. In your batch file, how many
 passports are valid?")
 
 (defmulti password-attribute-validation
-  (fn [k v] k))
+  (fn [[k v]] k))
 
 (defmethod password-attribute-validation
   "byr"
-  [_ v]
+  [[_ v]]
   (<= 1920 (Integer. v) 2002))
 
 (defmethod password-attribute-validation
   "iyr"
-  [_ v]
+  [[_ v]]
   (<= 2010 (Integer. v) 2020))
 
 (defmethod password-attribute-validation
   "eyr"
-  [_ v]
+  [[_ v]]
   (<= 2020 (Integer. v) 2030))
 
 (defmethod password-attribute-validation
   "hgt"
-  [_ v]
-  (let [[_ n u] (re-find #"([0-9]+)(in|cm)" v)])
-  (<= 2020 (Integer. v) 2030))
+  [[_ v]]
+  (let [[_ n u] (re-find #"([0-9]+)(in|cm)" v)]
+    (case u
+      "in" (<= 59 (Integer. n) 76)
+      "cm" (<= 150 (Integer. n) 193)
+      false)))
 
-(password-attribute-validation "byr" 2003)
+(defmethod password-attribute-validation
+  "hcl"
+  [[_ v]]
+  (re-find #"#[0-9a-f]{6}" v))
+
+(defmethod password-attribute-validation
+  "ecl"
+  [[_ v]]
+  (#{"amb"
+     "blu"
+     "brn"
+     "gry"
+     "grn"
+     "hzl"
+     "oth"} v))
+
+(defmethod password-attribute-validation
+  "pid"
+  [[_ v]]
+  (re-find #"[0-9]{9}" v))
+
+(defmethod password-attribute-validation
+  "cid"
+  [[_ v]]
+  true)
+
+(password-attribute-validation ["byr" 2002])
+(password-attribute-validation ["pid" "000000001"])
 
 (re-find #"([0-9]+)(in|cm)" "123cm")
+
+(defn has-valid-attributes?
+  [p]
+  (->> p
+       #(clojure.string/split % #" +|\n|:")
+       (apply hash-map)
+       (map password-attribute-validation)
+       (partial every? identity)))
+
+(defn count-valid-passports
+  [input]
+  (-> input
+      (clojure.string/split #"\n\n")
+      (->> (map #(clojure.string/split % #" +|\n|:"))
+           (map #(apply hash-map %))
+           (map #(map password-attribute-validation %))
+           (map (partial every? identity))
+           (filter identity)
+           (count))))
+
+(-> input
+    (clojure.string/split #"\n\n")
+    (->> (map #(clojure.string/split % #" +|\n|:"))
+         (map #(apply hash-map %))
+         (map #(map password-attribute-validation %))
+         (map (partial every? identity))
+         (filter identity)
+         (count)
+         (first)))

@@ -23,16 +23,17 @@ iyr:2011 ecl:brn hgt:59in")
 
 (deftest test-day4-attribute-validation
   (testing "byr"
-    (is (not (password-attribute-validation "byr" 1919)))
-    (is (password-attribute-validation "byr" 1920))
-    (is (password-attribute-validation "byr" 1962))
-    (is (password-attribute-validation "byr" 2002))
-    (is (not (password-attribute-validation "byr" 2003))))
+    (is (not (password-attribute-validation ["byr" 1919])))
+    (is (password-attribute-validation ["byr" 1920]))
+    (is (password-attribute-validation ["byr" 1962]))
+    (is (password-attribute-validation ["byr" 2002]))
+    (is (not (password-attribute-validation ["byr" 2003]))))
 
   (testing "iyr"
-    (is (not (password-attribute-validation "iyr" 1919)))
-    (is (not (password-attribute-validation "iyr" 1920)))
-    (is (not (password-attribute-validation "iyr" 1962)))
-    (is (password-attribute-validation "iyr" 2010))
-    (is (password-attribute-validation "iyr" 2020))
-    (is (not (password-attribute-validation "iyr" 2021)))))
+    (is (not (password-attribute-validation ["iyr" 1919])))
+    (is (not (password-attribute-validation ["iyr" 1920])))
+    (is (not (password-attribute-validation ["iyr" 1962])))
+    (is (password-attribute-validation ["iyr" 2010]))
+    (is (password-attribute-validation ["iyr" 2020]))
+    (is (not (password-attribute-validation ["iyr" 2021]))))
+
